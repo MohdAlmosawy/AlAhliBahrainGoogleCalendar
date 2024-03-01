@@ -14,11 +14,22 @@ def google_calendar_service():
     """Authenticate and return a service object to interact with Google Calendar API."""
     # Load and parse the credentials from environment variable
     creds_json_str = os.getenv("GOOGLE_CREDENTIALS_JSON")
-    creds_dict = json.loads(creds_json_str)
-    installed_creds_dict = creds_dict["installed"]  # Access the inner dictionary
+    print("Original creds_json_str:", creds_json_str)  # Debugging statement
+    
+    try:
+        creds_dict = json.loads(creds_json_str)
+        print("Parsed creds_dict:", creds_dict)  # Debugging statement
+    except json.JSONDecodeError as e:
+        print("Error parsing JSON:", e)
+        raise
 
+    if "installed" in creds_dict:
+        installed_creds_dict = creds_dict["installed"]
+    else:
+        print("'installed' key not found in creds_dict")
+        raise KeyError("'installed' key not found")
+    
     creds = Credentials.from_authorized_user_info(installed_creds_dict, SCOPES)
-
     service = build('calendar', 'v3', credentials=creds)
     return service
 
